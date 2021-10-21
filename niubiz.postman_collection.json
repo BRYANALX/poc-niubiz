@@ -1,0 +1,148 @@
+{
+	"info": {
+		"_postman_id": "ad05d334-e4ba-476f-bf1d-e135c755a2d3",
+		"name": "niubiz",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Step 1 - Crear Token Acceso Seguridad",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const accessToken = pm.response.text();",
+							"pm.environment.set(\"accessToken\", accessToken);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "integraciones.visanet@necomplus.com",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "d5e7nk$M",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{Host}}/api.security/v1/security",
+					"host": [
+						"{{Host}}"
+					],
+					"path": [
+						"api.security",
+						"v1",
+						"security"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Step 2 - Crear Token Sesión",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const sessionTokenResponse = pm.response.json();",
+							"const sessionToken = sessionTokenResponse.sessionKey;",
+							"",
+							"pm.environment.set(\"sessionToken\", sessionToken);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{accessToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"channel\": \"web\",\r\n    \"amount\": 10.5,\r\n    \"recurrenceMaxAmount\": 8.5,\r\n    \"antifraud\": {\r\n        \"clientIp\": \"24.252.107.29\",\r\n        \"merchantDefineData\": {\r\n            \"MDD15\": \"Valor MDD 15\",\r\n            \"MDD20\": \"Valor MDD 20\",\r\n            \"MDD33\": \"Valor MDD 33\"\r\n        }\r\n    }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{Host}}/api.ecommerce/v2/ecommerce/token/session/522591303",
+					"host": [
+						"{{Host}}"
+					],
+					"path": [
+						"api.ecommerce",
+						"v2",
+						"ecommerce",
+						"token",
+						"session",
+						"522591303"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Step 4 - Solicitar la autorización de la transacción",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{accessToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"channel\": \"web\",\r\n    \"captureType\": \"manual\",\r\n    \"countable\": true,\r\n    \"order\": {\r\n        \"tokenId\": \"{{formToken}}\",\r\n        \"purchaseNumber\": \"2020100906\",\r\n        \"amount\": 10.5,\r\n        \"currency\": \"PEN\",\r\n        \"productId\": \"329\"\r\n    },\r\n    \"cardHolder\": {\r\n        \"documentType\": \"0\",\r\n        \"documentNumber\": \"44444444\"\r\n    },\r\n    \"recurrence\": {\r\n        \"type\": \"FIXEDINITIAL\",\r\n        \"frequency\": \"MONTHLY\",\r\n        \"beneficiaryId\": \"ABC123\",\r\n        \"beneficiaryFirstName\": \"Prueba\",\r\n        \"beneficiaryLastName\": \"Prueba\",\r\n        \"maxAmount\": 8.5,\r\n        \"amount\": 2.5\r\n    }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{Host}}/api.authorization/v3/authorization/ecommerce/522591303",
+					"host": [
+						"{{Host}}"
+					],
+					"path": [
+						"api.authorization",
+						"v3",
+						"authorization",
+						"ecommerce",
+						"522591303"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "sessionToken",
+			"value": ""
+		}
+	]
+}
